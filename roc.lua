@@ -13,7 +13,7 @@ local function determine_roc_points_needed(responses_sorted, labels_sorted)
 		while i <= nsamples and responses_sorted[i] == split do
 			i = i+1
 		end
-		while i <= nsamples and labels_sorted[i] == -1 do
+		while i <= nsamples and labels_sorted[i] == 0 do
 			i = i+1	
 		end
 		npoints = npoints + 1
@@ -28,12 +28,12 @@ function ROC.points(responses, labels)
 	assert(responses:size():size() == 1, "responses should be a 1D vector")
 	assert(labels:size():size() == 1 , "labels should be a 1D vector")
 
-   	-- assuming labels {-1, 1}
-   	local npositives = torch.sum(torch.eq(labels,  1))
-   	local nnegatives = torch.sum(torch.eq(labels, -1))
+   	-- assuming labels {0, 1}
+   	local npositives = torch.sum(torch.eq(labels, 1))
+   	local nnegatives = torch.sum(torch.eq(labels, 0))
    	local nsamples = npositives + nnegatives
 
-   	assert(nsamples == responses:size()[1], "labels should contain only -1 or 1 values")
+   	assert(nsamples == responses:size()[1], "labels should contain only 0 or 1 values")
    	
    	-- sort by response value
    	local responses_sorted, indexes_sorted = torch.sort(responses)
@@ -46,7 +46,7 @@ function ROC.points(responses, labels)
   	local roc_num_points = determine_roc_points_needed(responses_sorted, labels_sorted)
    	local roc_points = torch.Tensor(roc_num_points, 2)
    	
-   	roc_points[1][1], roc_points[1][2] = 0.0, 0.0
+   	roc_points[roc_num_points][1], roc_points[roc_num_points][2]  = 1.0, 1.0
 
    	local npoints = 1
 	local true_negatives = 0
@@ -58,14 +58,14 @@ function ROC.points(responses, labels)
 		-- if samples have exactly the same response, can't distinguish
 		-- between them with a threshold in the middle
 		while i <= nsamples and responses_sorted[i] == split do
-			if labels_sorted[i] == -1 then
+			if labels_sorted[i] == 0 then
 				true_negatives = true_negatives + 1
 			else
 				false_negatives = false_negatives + 1
 			end
 			i = i+1
 		end
-		while i <= nsamples and labels_sorted[i] == -1 do
+		while i <= nsamples and labels_sorted[i] == 0 do
 			true_negatives = true_negatives + 1
 			i = i+1	
 		end
@@ -78,7 +78,7 @@ function ROC.points(responses, labels)
 		roc_points[roc_num_points - npoints + 1][2] = true_positive_rate
    	end
 
-   	roc_points[roc_num_points][1], roc_points[roc_num_points][2]  = 1.0, 1.0
+   	roc_points[1][1], roc_points[1][2] = 0.0, 0.0
 
    	return roc_points
 end
