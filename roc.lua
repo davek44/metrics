@@ -18,7 +18,7 @@ local function determine_roc_points_needed(responses_sorted, labels_sorted)
 		end
 		npoints = npoints + 1
    	end
-   	return npoints + 2
+   	return npoints + 1
 end
 
 
@@ -77,6 +77,8 @@ function ROC.points(responses, labels)
 		roc_points[roc_num_points - npoints + 1][1] = false_positive_rate
 		roc_points[roc_num_points - npoints + 1][2] = true_positive_rate
    	end
+
+   	assert(roc_num_points - npoints + 1 == 2, "missed pre-allocated table target")
 
    	roc_points[1][1], roc_points[1][2] = 0.0, 0.0
 
